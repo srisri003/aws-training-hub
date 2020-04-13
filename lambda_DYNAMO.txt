@@ -1,0 +1,16 @@
+Go to Lambda
+Create lambda
+select python
+
+add trigger 
+select s3 and bucket name
+select prefix and suffix 
+put code unde
+
+
+create table in dynamo db
+
+add resource in lambda
+dynamodb = boto3.resource()
+
+boto3.client vs boto3.resource

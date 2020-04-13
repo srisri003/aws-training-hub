@@ -1,0 +1,46 @@
+import json
+import boto3
+
+s3 = boto3.client('s3')
+dynamodb = boto3.resource('dynamodb')
+
+
+def lambda_handler(event, context):
+    # TODO implement
+    #print ("Event passed to lambda",event)
+    #print ("Type of event",type(event) )
+    int_event = event['Records'][0]
+    #print ("Intermediate value of event",int_event)
+    int_bucket = int_event['s3']['bucket']
+    int_object = int_event['s3']['object']
+
+    #print ("Intermediate value of Bucket",int_bucket)    
+    #print ("Intermediate value of Object", int_object)
+    bucketname = int_bucket['name']
+    filename = int_object['key']
+
+    print ("$$$$$$Bucket name:", bucketname)    
+    print ("$$$$$$File name",filename)
+    read_s3_file(bucketname,filename)
+
+def read_s3_file(bucket,file):
+    filecontent = s3.get_object(Bucket=bucket, Key=file)
+    print("#############filecontent:")
+    rows = filecontent['Body'].read().decode('utf8').split('\n')
+    print (rows)
+    write_to_dynamodb(rows)
+
+def write_to_dynamodb(rows):
+    table = dynamodb.Table('testtable')
+    print ("------------------------Writing to DynamoDB Table")
+    with table.batch_writer() as batch:
+        for row in rows:
+            batch.put_item(Item={
+                'id': row.split('|')[0],
+                'employee_name': row.split('|')[1],
+                'salary': row.split('|')[2],
+                'currency': row.split('|')[3],
+                'country': row.split('|')[4]
+            }
+            )
+    print ("------------------------Writing to Dynamodb Completed") 
